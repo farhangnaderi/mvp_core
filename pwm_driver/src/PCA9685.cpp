@@ -1,8 +1,8 @@
 #include "pwm_driver/PCA9685.h"
 #include <unistd.h>
 #include <cmath>
-#include "Constants.h"
-#include "I2CPeripheral.h"
+#include "pwm_driver/Constants.h"
+#include "pwm_driver/I2CPeripheral.h"
 
 
 PCA9685::PCA9685(const std::string &device, int address) {

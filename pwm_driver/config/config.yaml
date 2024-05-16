@@ -1,16 +1,14 @@
-/test_robot/pwm_driver_node:
-  ros__parameters:
-    pwm_frequency: 47.2
-    pwm_ms_bias: 0.09
-  
-    thruster_ch_list: [1, 2, 3, 4]
-    thruster_topic_list: [thruster_1, thruster_2, thruster_3, thruster_4]
-    thruster_min_us: [1100, 1100, 1100, 1100]
-    thruster_max_us: [1900, 1900, 1900, 1900]
-    thruster_init_us: [1500, 1500, 1500, 1500]
+pwm_frequency: 47.2
+pwm_ms_bias: 0.09
 
-    led_ch_list: [5]
-    led_topic_list: [led_1]
-    led_min_us: [1100]
-    led_max_us: [1900]
-    led_init_us: [1100]
+thruster_ch_list: [1, 2, 3, 4]
+thruster_topic_list: [thruster_1, thruster_2, thruster_3, thruster_4]
+thruster_min_us: [1100, 1100, 1100, 1100]
+thruster_max_us: [1900, 1900, 1900, 1900]
+thruster_init_us: [1500, 1500, 1500, 1500]
+
+led_ch_list: [5]
+led_topic_list: [led_1]
+led_min_us: [1100]
+led_max_us: [1900]
+led_init_us: [1100]

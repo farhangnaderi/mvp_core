@@ -1,73 +1,52 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.0.2)
 project(pwm_driver)
 
-if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  add_compile_options(-Wall -Wextra -Wpedantic)
-endif()
-
-# find dependencies
-find_package(ament_cmake REQUIRED)
-find_package(rclcpp REQUIRED)
-find_package(std_msgs REQUIRED)
-find_package(geometry_msgs REQUIRED)
-find_package(std_msgs REQUIRED)
-
-
-set(dependencies
-  rclcpp
+# Find catkin macros and libraries
+find_package(catkin REQUIRED COMPONENTS
+  roscpp
   std_msgs
 )
 
+# Declare a catkin package
+catkin_package(
+  INCLUDE_DIRS include
+  LIBRARIES pwm_driver
+  CATKIN_DEPENDS roscpp std_msgs
+)
+
+# Specify additional locations of header files
 include_directories(
   include
+  ${catkin_INCLUDE_DIRS}
 )
+
 set(library_name ${PROJECT_NAME})
 
-#Add library
-add_library(${library_name} SHARED 
-  include/pwm_driver/pwm_driver.cpp
-  include/pwm_driver/PCA9685.cpp
-  include/pwm_driver/I2CPeripheral.cpp
+# Add library
+add_library(${library_name}
+  src/pwm_driver.cpp
+  src/PCA9685.cpp
+  src/I2CPeripheral.cpp
 )
 
-ament_target_dependencies(
-  ${library_name} 
-  ${dependencies} 
-)
+# Link the library with i2c and catkin libraries
+target_link_libraries(${library_name} ${catkin_LIBRARIES} i2c)
 
-#Add exe
+# Add executable
 add_executable(pwm_driver_node src/pwm_driver_node.cpp)
-target_link_libraries(pwm_driver_node ${library_name} i2c)
-ament_target_dependencies(pwm_driver_node ${dependencies})
+target_link_libraries(pwm_driver_node ${library_name} ${catkin_LIBRARIES} i2c)
 
-# add_executable(test_node src/test_node.cpp)
-# target_link_libraries(test_node ${library_name} i2c)
-# ament_target_dependencies(test_node ${dependencies})
-
-
+# Install targets
 install(TARGETS pwm_driver_node ${library_name}
-ARCHIVE DESTINATION lib
-LIBRARY DESTINATION lib
-RUNTIME DESTINATION lib/${PROJECT_NAME}
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
-
-install(DIRECTORY include/
-DESTINATION include/
+install(DIRECTORY include/${PROJECT_NAME}/
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
 )
 
-
-ament_export_include_directories(include)
-ament_export_libraries(${library_name})
-ament_export_dependencies(${dependencies})
-
-
-##launch files
-install(DIRECTORY
-  launch
-  config
-  DESTINATION share/${PROJECT_NAME}/
+install(DIRECTORY launch config
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
-
-
-ament_package()

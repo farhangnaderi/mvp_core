@@ -1,3 +1,0 @@
-<launch>
-  <node pkg="mvp_utility" exec="pressure_to_depth_node" name="pressure_to_depth_node" namespace="test_robot"/>
-</launch>
