@@ -1,7 +1,3 @@
-/*
-    This library interfaces with the PCA9685 Chip for PWM signal generation
-*/
-
 #ifndef PWM_DRIVER_HPP_
 #define PWM_DRIVER_HPP_
 
@@ -20,6 +16,7 @@ public:
 private:
     ros::NodeHandle nh_; 
     double m_pwm_ms_bias;
+    double m_servo_pwm_ms_bias;
     
     struct thruster_t
     {
@@ -38,12 +35,14 @@ private:
     {
         int index;
         int channel;
-        int min_pwm;
-        int max_pwm;
+        int min_us;
+        int max_us;
+        int center_us;
         std::string topic_name;
-        std::string joint_name;
     };
     std::vector<servo_t> servos;
+    std::vector<ros::Subscriber> servo_subs_;
+    void f_servo_callback(const std_msgs::Float64::ConstPtr& msg, int i);
 
     struct led_t
     {
