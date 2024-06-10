@@ -1,3 +1,6 @@
+/*
+    This library interfaces with the PCA9685 Chip for PWM signal generation
+*/
 #ifndef PWM_DRIVER_HPP_
 #define PWM_DRIVER_HPP_
 
