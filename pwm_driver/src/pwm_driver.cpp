@@ -1,5 +1,6 @@
 #include "pwm_driver/pwm_driver.hpp"
 #include <cstdio>
+#include <cstdlib>
 
 PwmDriver::PwmDriver(ros::NodeHandle& nh) : nh_(nh)
 {
@@ -12,6 +13,9 @@ PwmDriver::PwmDriver(ros::NodeHandle& nh) : nh_(nh)
 
     pca.set_pwm_freq(m_pwm_frequency);
 
+    // Initialize I2C communication with ATtiny
+    init_i2c();
+
     // Set timeout duration and initialize safety timer
     double timeout_seconds;
     nh_.param("timeout_seconds", timeout_seconds, 2.0);
@@ -19,7 +23,7 @@ PwmDriver::PwmDriver(ros::NodeHandle& nh) : nh_(nh)
     safety_timer_ = nh_.createTimer(ros::Duration(1.0), &PwmDriver::safety_check, this);
     last_command_time_ = ros::Time::now();
 
-    // thruster params
+    // thruster parms
     int m_thruster_num;
     std::vector<int> m_thruster_ch_list;
     std::vector<std::string> m_thruster_topic_list;
@@ -104,10 +108,21 @@ PwmDriver::PwmDriver(ros::NodeHandle& nh) : nh_(nh)
     }
 }
 
+void PwmDriver::init_i2c()
+{
+    attiny_fd = wiringPiI2CSetup(attiny_i2c_address);
+    if (attiny_fd == -1) {
+        ROS_ERROR("Failed to initialize I2C communication with ATtiny");
+    }
+}
+
 void PwmDriver::f_thruster_callback(const std_msgs::Float64::ConstPtr& msg, int i)
 {
     // Update the last command time
     last_command_time_ = ros::Time::now();
+
+    // Send working state to ATtiny
+    send_i2c_data(true);
 
     // scale it
     if (msg->data >= -1.0 && msg->data <= 1.0)
@@ -129,6 +144,9 @@ void PwmDriver::f_led_callback(const std_msgs::Float64::ConstPtr& msg, int i)
     // Update the last command time
     last_command_time_ = ros::Time::now();
 
+    // Send working state to ATtiny
+    send_i2c_data(true);
+
     // scale it
     if (msg->data >= 0.0 && msg->data <= 1.0)
     {
@@ -148,6 +166,9 @@ void PwmDriver::f_servo_callback(const std_msgs::Float64::ConstPtr& msg, int i)
 {
     // Update the last command time
     last_command_time_ = ros::Time::now();
+
+    // Send working state to ATtiny
+    send_i2c_data(true);
 
     // scale it
     if (msg->data >= -1.0 && msg->data <= 1.0)
@@ -174,5 +195,27 @@ void PwmDriver::safety_check(const ros::TimerEvent& event)
         {
             pca.set_pwm(servo.channel, 0, 0);  // Set PWM to zero (off)
         }
+
+        // Send not working state to ATtiny
+        send_i2c_data(false);
+    }
+}
+
+void PwmDriver::send_i2c_data(bool working)
+{
+    if (attiny_fd != -1) { // Check if the I2C file descriptor is valid
+        // Generate a random number to indicate the system state
+        // If 'working' is true, generate a number between 0 and 255
+        // If 'working' is false, generate a number between 256 and 511
+        int data = working ? (rand() % 256) : (rand() % 256 + 256);
+
+        // Send the generated random number to the ATtiny via I2C
+        wiringPiI2CWrite(attiny_fd, data);
+
+        // Print the sent data for debugging purposes
+        printf("Sent I2C data: %d\n", data);
+    } else {
+        // If the I2C file descriptor is invalid, print an error message
+        printf("Failed to send I2C data: Invalid file descriptor\n");
     }
 }

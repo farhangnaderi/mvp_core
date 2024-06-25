@@ -7,6 +7,9 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
 )
 
+# Find the wiringPi library
+find_library(WIRINGPI_LIB wiringPi)
+
 # Declare a catkin package
 catkin_package(
   INCLUDE_DIRS include
@@ -29,12 +32,12 @@ add_library(${library_name}
   src/I2CPeripheral.cpp
 )
 
-# Link the library with i2c and catkin libraries
-target_link_libraries(${library_name} ${catkin_LIBRARIES} i2c)
+# Link the library with i2c, wiringPi, and catkin libraries
+target_link_libraries(${library_name} ${catkin_LIBRARIES} i2c ${WIRINGPI_LIB})
 
 # Add executable
 add_executable(pwm_driver_node src/pwm_driver_node.cpp)
-target_link_libraries(pwm_driver_node ${library_name} ${catkin_LIBRARIES} i2c)
+target_link_libraries(pwm_driver_node ${library_name} ${catkin_LIBRARIES} i2c ${WIRINGPI_LIB})
 
 # Install targets
 install(TARGETS pwm_driver_node ${library_name}

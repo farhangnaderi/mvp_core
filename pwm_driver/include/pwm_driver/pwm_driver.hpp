@@ -10,6 +10,7 @@
 #include <vector>
 #include "PCA9685.h"
 #include <stdint.h>
+#include <wiringPiI2C.h>
 
 class PwmDriver
 {
@@ -22,9 +23,15 @@ private:
     double m_servo_pwm_ms_bias;
 
     ros::Timer safety_timer_;  // Timer to check for command updates
-    ros::Duration timeout_duration_;  // Duration after which to set PWM to neutral
+    ros::Duration timeout_duration_;  // Duration after which to kill PWM signals
     ros::Time last_command_time_;  // Time when the last command was received
     void safety_check(const ros::TimerEvent& event);  // Function to check for command updates
+
+    // I2C communication with ATtiny
+    int attiny_fd;
+    const int attiny_i2c_address = 0x08;  // I2C address for ATtiny
+    void init_i2c();  
+    void send_i2c_data(bool working);
 
     struct thruster_t
     {
