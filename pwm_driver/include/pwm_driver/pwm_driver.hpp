@@ -20,7 +20,12 @@ private:
     ros::NodeHandle nh_; 
     double m_pwm_ms_bias;
     double m_servo_pwm_ms_bias;
-    
+
+    ros::Timer safety_timer_;  // Timer to check for command updates
+    ros::Duration timeout_duration_;  // Duration after which to set PWM to neutral
+    ros::Time last_command_time_;  // Time when the last command was received
+    void safety_check(const ros::TimerEvent& event);  // Function to check for command updates
+
     struct thruster_t
     {
         int index;

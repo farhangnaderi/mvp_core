@@ -7,6 +7,8 @@
         <param name="pwm_frequency" value="50"/>
         <param name="pwm_ms_bias" value="0.0"/>
         <param name="thruster_num" value="8"/>
+         <!-- Kill all signals safety timeout -->
+        <param name="timeout_seconds" value="2.0"/> 
         <!-- Add other parameters as needed -->
     </node>
 </launch>

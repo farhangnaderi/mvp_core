@@ -12,6 +12,13 @@ PwmDriver::PwmDriver(ros::NodeHandle& nh) : nh_(nh)
 
     pca.set_pwm_freq(m_pwm_frequency);
 
+    // Set timeout duration and initialize safety timer
+    double timeout_seconds;
+    nh_.param("timeout_seconds", timeout_seconds, 2.0);
+    timeout_duration_ = ros::Duration(timeout_seconds);
+    safety_timer_ = nh_.createTimer(ros::Duration(1.0), &PwmDriver::safety_check, this);
+    last_command_time_ = ros::Time::now();
+
     // thruster params
     int m_thruster_num;
     std::vector<int> m_thruster_ch_list;
@@ -99,6 +106,9 @@ PwmDriver::PwmDriver(ros::NodeHandle& nh) : nh_(nh)
 
 void PwmDriver::f_thruster_callback(const std_msgs::Float64::ConstPtr& msg, int i)
 {
+    // Update the last command time
+    last_command_time_ = ros::Time::now();
+
     // scale it
     if (msg->data >= -1.0 && msg->data <= 1.0)
     {
@@ -116,6 +126,9 @@ void PwmDriver::f_thruster_callback(const std_msgs::Float64::ConstPtr& msg, int 
 
 void PwmDriver::f_led_callback(const std_msgs::Float64::ConstPtr& msg, int i)
 {
+    // Update the last command time
+    last_command_time_ = ros::Time::now();
+
     // scale it
     if (msg->data >= 0.0 && msg->data <= 1.0)
     {
@@ -133,6 +146,9 @@ void PwmDriver::f_led_callback(const std_msgs::Float64::ConstPtr& msg, int i)
 
 void PwmDriver::f_servo_callback(const std_msgs::Float64::ConstPtr& msg, int i)
 {
+    // Update the last command time
+    last_command_time_ = ros::Time::now();
+
     // scale it
     if (msg->data >= -1.0 && msg->data <= 1.0)
     {
@@ -145,5 +161,18 @@ void PwmDriver::f_servo_callback(const std_msgs::Float64::ConstPtr& msg, int i)
     else
     {
         printf("input out of range\r\n");
+    }
+}
+
+void PwmDriver::safety_check(const ros::TimerEvent& event)
+{
+    // Check if the last command was received within the timeout duration
+    if ((ros::Time::now() - last_command_time_) > timeout_duration_)
+    {
+        // Timeout occurred, kill PWM signals
+        for (auto& servo : servos)
+        {
+            pca.set_pwm(servo.channel, 0, 0);  // Set PWM to zero (off)
+        }
     }
 }
