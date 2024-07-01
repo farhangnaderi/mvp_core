@@ -10,11 +10,14 @@
 #include <vector>
 #include "PCA9685.h"
 #include <stdint.h>
+#include <thread>
+#include <atomic>
 
 class PwmDriver
 {
 public:
     PwmDriver(ros::NodeHandle& nh);
+    ~PwmDriver();
 
 private:
     ros::NodeHandle nh_; 
@@ -66,6 +69,12 @@ private:
     void f_led_callback(const std_msgs::Float64::ConstPtr& msg, int i); 
 
     PCA9685 pca{};
+
+    // Add new members for I2C and heartbeat
+    std::thread heartbeat_thread_;
+    std::atomic<bool> running_;
+    int i2c_file_;
+    void send_heartbeat();
 };
 
 #endif
