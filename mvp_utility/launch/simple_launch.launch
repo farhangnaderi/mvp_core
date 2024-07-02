@@ -1,0 +1,5 @@
+<launch>
+  <node name="imu_ned_enu_node" pkg="mvp_utility" type="imu_ned_enu_node" output="screen">
+    <rosparam file="$(find mvp_utility)/config/imu_ned_enu_node.yaml" />
+  </node>
+</launch>
