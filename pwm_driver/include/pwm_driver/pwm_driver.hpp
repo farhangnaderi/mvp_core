@@ -22,7 +22,6 @@ public:
 private:
     ros::NodeHandle nh_; 
     double m_pwm_ms_bias;
-    double m_servo_pwm_ms_bias;
 
     ros::Timer safety_timer_;  // Timer to check for command updates
     ros::Duration timeout_duration_;  // Duration after which to set PWM to neutral
@@ -77,4 +76,4 @@ private:
     void send_heartbeat();
 };
 
-#endif
+#endif  // PWM_DRIVER_HPP_
